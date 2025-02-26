@@ -3,13 +3,16 @@ package main
 type cliCommand struct {
 	name string
 	description string
-	callback func() error
+	callback func(conf *config) error
 }
 
-var supportedCommands map[string]cliCommand
+type config struct {
+	next string
+	previous string
+}
 
-func init() {
-	supportedCommands = map[string]cliCommand{
+func getCommands() map[string]cliCommand {
+	return map[string]cliCommand{
 		"exit": {
 			name: "exit",
 			description: "Exit the Pokedex",
@@ -22,12 +25,12 @@ func init() {
 		},
 		"map": {
 			name: "map",
-			description: "",
+			description: "Get next 20 Pokemon area locations",
 			callback: commandMap,
 		},
 		"mapb": {
 			name: "mapb",
-			description: "",
+			description: "Get previous 20 Pokemon area locations",
 			callback: commandMapB,
 		},
 	}

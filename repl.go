@@ -9,6 +9,10 @@ import (
 
 func startRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
+	conf := &config {
+		next: "",
+		previous: "",
+	}
 	for {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
@@ -19,12 +23,12 @@ func startRepl() {
 			continue
 		}
 		
-		command, ok := supportedCommands[words[0]]
+		command, ok := getCommands()[words[0]]
 		if !ok {
 			fmt.Println("Unknown command")
 			continue
 		}
-		if err := command.callback(); err != nil {
+		if err := command.callback(conf); err != nil {
 			fmt.Printf("Unable to execute command: %v", err)
 		}
 	}
