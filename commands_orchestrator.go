@@ -1,6 +1,8 @@
 package main
 
-import "github.com/mjh1207/gopokedex/internal/pokeapi"
+import (
+	"github.com/mjh1207/gopokedex/internal/pokeapi"
+)
 
 type cliCommand struct {
 	name string

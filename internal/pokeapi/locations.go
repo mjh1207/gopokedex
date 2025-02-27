@@ -3,6 +3,7 @@ package pokeapi
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -18,8 +19,19 @@ type LocationArea struct {
 
 func (c *Client) GetLocationArea(pageURL *string) (LocationArea, error){
 	// Set request url
-	url := baseUrl + "/location-area"
+	url := baseUrl + "/location-area/?offset=0&limit=20"
 	if pageURL != nil { url = *pageURL }
+
+	// If url is in the cache, use that data
+	val, ok := c.cache.Get(url)
+	if ok {
+		fmt.Println("****************USING CACHED DATA**************************")
+		var areas LocationArea
+		if err := json.Unmarshal(val, &areas); err != nil {
+			return LocationArea{}, err
+		}
+		return areas, nil
+	}
 
 	// Create GET request
 	req, err := http.NewRequest("GET", url, nil)
@@ -35,13 +47,18 @@ func (c *Client) GetLocationArea(pageURL *string) (LocationArea, error){
 	}
 	defer res.Body.Close()
 
-	//Decode response into location struct and return
-	var areas LocationArea
-	decoder := json.NewDecoder(res.Body)
-	err = decoder.Decode(&areas)
+	// Unmarshal response into location struct and return
+	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		return LocationArea{}, fmt.Errorf("unable to decode json - Error: %v", err)
+		return LocationArea{}, err
+	}
+	
+	var areas LocationArea
+	err = json.Unmarshal(data, &areas)
+	if err != nil {
+		return LocationArea{}, err
 	}
 
+	c.cache.Add(url, data)
 	return areas, nil
 }
