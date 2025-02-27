@@ -7,12 +7,8 @@ import (
 	"strings"
 )
 
-func startRepl() {
+func startRepl(conf *config) {
 	scanner := bufio.NewScanner(os.Stdin)
-	conf := &config {
-		next: "",
-		previous: "",
-	}
 	for {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()

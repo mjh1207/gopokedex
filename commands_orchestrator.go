@@ -1,5 +1,7 @@
 package main
 
+import "github.com/mjh1207/gopokedex/internal/pokeapi"
+
 type cliCommand struct {
 	name string
 	description string
@@ -7,8 +9,9 @@ type cliCommand struct {
 }
 
 type config struct {
-	next string
-	previous string
+	pokeapiClient pokeapi.Client
+	next *string
+	previous *string
 }
 
 func getCommands() map[string]cliCommand {

@@ -1,30 +1,19 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-
-	"github.com/mjh1207/gopokedex/internal/pokeapi"
 )
 
 func commandMap(conf *config) error {
-	areas, err := pokeapi.GetLocationArea(conf.next)
-
-	// Set new config state - Next
+	areas, err := conf.pokeapiClient.GetLocationArea(conf.next)
 	if err != nil {
-		return fmt.Errorf("GetLocationArea failed - Error: %v", err)
+		return err
 	}
-	if areas.Next == nil {
-		conf.next = ""
-	} else {
-		conf.next = *areas.Next
-	}
-
-	// Set new config state - Previous
-	if areas.Previous == nil {
-		conf.previous = ""
-	} else {
-		conf.previous = *areas.Previous
-	}
+	
+	// Set new config state - Next
+	conf.next = areas.Next
+	conf.previous = areas.Previous
 
 	// Print all result locations
 	for _, result := range areas.Results {
@@ -34,23 +23,17 @@ func commandMap(conf *config) error {
 }
 
 func commandMapB(conf *config) error {
-	areas, err := pokeapi.GetLocationArea(conf.previous)
-	// Set new config state - Next
+	if conf.previous == nil {
+		return errors.New("you are on the first page")
+	}
+	areas, err := conf.pokeapiClient.GetLocationArea(conf.previous)
 	if err != nil {
-		return fmt.Errorf("GetLocationArea failed - Error: %v", err)
+		return err
 	}
-	if areas.Next == nil {
-		conf.next = ""
-	} else {
-		conf.next = *areas.Next
-	}
-
-	// Set new config state - Previous
-	if areas.Previous == nil {
-		conf.previous = ""
-	} else {
-		conf.previous = *areas.Previous
-	}
+	
+	// Set new config state - Next
+	conf.next = areas.Next
+	conf.previous = areas.Previous
 
 	// Print all result locations
 	for _, result := range areas.Results {
