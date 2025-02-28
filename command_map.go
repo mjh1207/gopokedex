@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-func commandMap(conf *config) error {
-	areas, err := conf.pokeapiClient.GetLocationArea(conf.next)
+func commandMap(conf *config, param string) error {
+	areas, err := conf.pokeapiClient.GetBatchLocations(conf.next)
 	if err != nil {
 		return err
 	}
@@ -22,11 +22,11 @@ func commandMap(conf *config) error {
 	return nil
 }
 
-func commandMapB(conf *config) error {
+func commandMapB(conf *config, param string) error {
 	if conf.previous == nil {
 		return errors.New("you are on the first page")
 	}
-	areas, err := conf.pokeapiClient.GetLocationArea(conf.previous)
+	areas, err := conf.pokeapiClient.GetBatchLocations(conf.previous)
 	if err != nil {
 		return err
 	}

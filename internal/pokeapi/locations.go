@@ -7,27 +7,17 @@ import (
 	"net/http"
 )
 
-type LocationArea struct {
-	Count    int    `json:"count"`
-	Next     *string `json:"next"`
-	Previous *string    `json:"previous"`
-	Results  []struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	} `json:"results"`
-}
-
-func (c *Client) GetLocationArea(pageURL *string) (LocationArea, error){
+func (c *Client) GetBatchLocations(pageURL *string) (RespBatchLocations, error){
 	// Set request url
-	url := baseUrl + "/location-area/?offset=0&limit=20"
+	url := baseUrl + locationAPI + "/?offset=0&limit=20"
 	if pageURL != nil { url = *pageURL }
 
 	// If url is in the cache, use that data
 	val, ok := c.cache.Get(url)
 	if ok {
-		var areas LocationArea
+		var areas RespBatchLocations
 		if err := json.Unmarshal(val, &areas); err != nil {
-			return LocationArea{}, err
+			return RespBatchLocations{}, err
 		}
 		return areas, nil
 	}
@@ -35,29 +25,70 @@ func (c *Client) GetLocationArea(pageURL *string) (LocationArea, error){
 	// Create GET request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return LocationArea{}, err
+		return RespBatchLocations{}, err
 	}
 
-	// Make GET request and verify response
+	// Send GET request and verify response
 	res, err := c.httpClient.Do(req)
 	if err != nil || res.StatusCode > 299 {
-		fmt.Println("FAILED TO GET DATA")
-		return LocationArea{}, fmt.Errorf("unable to GET from %s - Status Code: %v", url, res.StatusCode)
+		return RespBatchLocations{}, err
 	}
 	defer res.Body.Close()
 
-	// Unmarshal response into location struct and return
+	// Unmarshal response into batch location struct and return
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		return LocationArea{}, err
+		return RespBatchLocations{}, err
 	}
 	
-	var areas LocationArea
+	var areas RespBatchLocations
 	err = json.Unmarshal(data, &areas)
 	if err != nil {
-		return LocationArea{}, err
+		return RespBatchLocations{}, err
 	}
 
 	c.cache.Add(url, data)
 	return areas, nil
+}
+
+func (c *Client) GetLocationData(areaName string) (RespLocationData, error) {
+	url := fmt.Sprintf("%s%s/%s",baseUrl, locationAPI, areaName)
+
+	// if url is in cache, use that data
+	val, ok := c.cache.Get(url)
+	if ok {
+		var locationData RespLocationData
+		if err := json.Unmarshal(val, &locationData); err != nil {
+			return RespLocationData{}, err
+		}
+		return locationData, nil
+	}
+
+	// Create GET request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return RespLocationData{}, err
+	}
+
+	// Send GET request and verify response 
+	res, err := c.httpClient.Do(req)
+	if err != nil || res.StatusCode > 299 {
+		return RespLocationData{}, err
+	}
+	defer res.Body.Close()
+	
+	// Unmarshal response into location data struct and return
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return RespLocationData{}, err
+	}
+
+	var areaInfo RespLocationData
+	err = json.Unmarshal(data, &areaInfo)
+	if err != nil {
+		return RespLocationData{}, err
+	}
+
+	c.cache.Add(url, data)
+	return areaInfo, nil
 }
