@@ -30,7 +30,7 @@ func startRepl(conf *config) {
 			continue
 		}
 		if err := command.callback(conf, param); err != nil {
-			fmt.Printf("Unable to execute command: %v", err)
+			fmt.Printf("Unable to execute command: %v\n", err)
 		}
 	}
 }

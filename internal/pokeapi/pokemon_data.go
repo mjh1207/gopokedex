@@ -30,7 +30,7 @@ func (c *Client) GetSpeciesData(pokeName string) (RespCaptureRate, error){
 	// Send request and verify response
 	res, err := c.httpClient.Do(req)
 	if err != nil || res.StatusCode > 299 {
-		return RespCaptureRate{}, err
+		return RespCaptureRate{}, fmt.Errorf("unable to get data for %s", pokeName)
 	}
 	defer res.Body.Close()
 
@@ -73,7 +73,7 @@ func (c *Client) GetPokemonData(pokeName string) (Pokemon, error){
 	// Send request and verify response
 	res, err := c.httpClient.Do(req)
 	if err != nil || res.StatusCode > 299 {
-		return Pokemon{}, err
+		return Pokemon{}, fmt.Errorf("unable to get data for %s", pokeName)
 	}
 	defer res.Body.Close()
 
