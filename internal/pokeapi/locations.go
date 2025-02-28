@@ -25,7 +25,6 @@ func (c *Client) GetLocationArea(pageURL *string) (LocationArea, error){
 	// If url is in the cache, use that data
 	val, ok := c.cache.Get(url)
 	if ok {
-		fmt.Println("****************USING CACHED DATA**************************")
 		var areas LocationArea
 		if err := json.Unmarshal(val, &areas); err != nil {
 			return LocationArea{}, err
